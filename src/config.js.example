@@ -1,0 +1,6 @@
+const config = {
+    supportedChainIds: [1, 4, 137, 250, 43114, 80001],
+    connectors: { injected: {} },
+};
+
+export default config;

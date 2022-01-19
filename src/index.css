@@ -1,0 +1,71 @@
+html,
+body {
+  margin: 0;
+  font-family: Archivo, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #2a9d8f;
+  color: #fff;
+  overflow-x: hidden;
+}
+#root {
+  min-height: 100vh;
+  display: flex;
+}
+
+.unsupported-network,
+.connect-wallet,
+.not-a-citizen {
+  flex-direction: column;
+  width: 960px;
+  max-width: calc(100% - 1rem);
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  margin: auto;
+  align-content: center;
+  display: flex;
+  text-align: center;
+}
+
+button {
+  cursor: pointer;
+  background-color: #e9c46a;
+  color: #000;
+  border: none;
+  font-weight: bold;
+  font-family: inherit;
+  padding: 1.2rem 2rem;
+  text-transform: uppercase;
+  border-radius: 3rem;
+  font-size: 1.2rem;
+}
+
+button:hover {
+  background-color: #f4a261;
+}
+
+button:focus {
+  background-color: #f29040;
+}
+
+button:disabled {
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+h1 {
+  font-size: 5rem;
+}
+@media screen and (max-width: 768px) {
+  h1 {
+    font-size: 3rem;
+  }
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+p {
+  font-size: 1.4rem;
+}
