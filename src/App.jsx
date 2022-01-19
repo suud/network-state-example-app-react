@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import { useWeb3, useSwitchNetwork } from "@3rdweb/hooks";
 import config from "./config";
+import awsconfig from "./aws-exports";
+import useAmplifyWalletAuth from "./hooks/useAmplifyWalletAuth";
 
 const App = () => {
-  const { connectWallet, disconnectWallet, address, error, chainId } = useWeb3();
+  const { connectWallet, address, error, chainId } = useWeb3();
   const { switchNetwork } = useSwitchNetwork();
+  const { signIn, signOut, user } = useAmplifyWalletAuth(awsconfig);
   console.log("👋 Address:", address);
+  console.log("👋 User:   ", user ? user.username : undefined);
 
   const [usesSupportedChain, setUsesSupportedChain] = useState(true);
 
@@ -21,6 +25,22 @@ const App = () => {
     }
     setUsesSupportedChain(true);
   }, [chainId, error]);
+
+  // Sign out and/or of AWS when address changes
+  useEffect(() => {
+    if (!address && user) {
+      signOut();
+      return;
+    }
+    if (address && !user) {
+      signIn(address);
+      return;
+    }
+    if (address && user && address !== user.username) {
+      signOut();
+      return;
+    }
+  }, [address, user, signIn, signOut]);
 
   // If a unsupported chain is selected, the user will see this
   if (!usesSupportedChain) {
@@ -47,13 +67,20 @@ const App = () => {
     );
   }
 
+  // Authenticated users will see this
+  if (user) {
+    return (
+      <div className="authenticated-user">
+        <h1>Bike Land</h1>
+        <p>You're in!</p>
+      </div>
+    );
+  }
+
   // Users with connected wallet but no auth session see this
   return (
     <div className="not-a-citizen">
       <h1>You are not a Bike Land Citizen</h1>
-      <button onClick={disconnectWallet} className="btn-hero">
-        Disconnect
-      </button>
     </div>
   );
 };

@@ -15,6 +15,7 @@ body {
 
 .unsupported-network,
 .connect-wallet,
+.authenticated-user,
 .not-a-citizen {
   flex-direction: column;
   width: 960px;

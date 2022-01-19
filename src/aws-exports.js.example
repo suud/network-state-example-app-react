@@ -1,0 +1,9 @@
+const awsconfig = {
+    Auth: {
+        region: "us-east-1",
+        userPoolId: "us-east-1_A1A1A1A1A",
+        userPoolWebClientId: "a1a1a1a1a1a1a1a1a1a1a1a1a1",
+    }
+};
+
+export default awsconfig;
