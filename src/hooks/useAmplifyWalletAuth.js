@@ -33,21 +33,42 @@ function useAmplifyWalletAuth(awsconfig) {
         return auth.signUp(params);
     }
 
-    const answerAuthChallenge = (cognitoUser) => {
-        // TODO: sign message
-        const answer = "test";
-        auth.sendCustomChallengeAnswer(cognitoUser, answer)
-            .then(authenticatedUser => {
-                setUser(authenticatedUser)
-                console.log("✅ Successfully answered auth challenge!")
+    const answerAuthChallenge = ({ cognitoUser, signer }) => {
+        console.log(cognitoUser);
+        if (!cognitoUser) {
+            console.log("🤔 No cognitoUser given...");
+            return;
+        }
+        if (!cognitoUser.challengeParam || !cognitoUser.challengeParam.loginCode) {
+            console.log("🤔 No loginCode given...");
+            return;
+        }
+        if (user) {
+            console.log("🤔 User already authenticated...");
+            return;
+        }
+
+        signer.signMessage(cognitoUser.challengeParam.loginCode)
+            .then(answer => {
+                console.log(answer);
+                auth.sendCustomChallengeAnswer(cognitoUser, answer)
+                    .then(authenticatedUser => {
+                        setUser(authenticatedUser)
+                        console.log("✅ Successfully answered auth challenge!")
+                    })
+                    .catch(err => console.log("🛑 Error when trying to anwer auth challenge:", err));
             })
-            .catch(err => console.log("🛑 Error when trying to anwer auth challenge:", err));
+            .catch(err => console.log("🛑 Error when trying to sign challenge code:", err));
     }
 
     // Sign in
-    const signIn = (pubKey) => {
+    const signIn = ({ pubKey, signer }) => {
         if (!pubKey) {
             console.log("🤔 No pubKey given...");
+            return;
+        }
+        if (!signer) {
+            console.log("🤔 No signer given...");
             return;
         }
         if (user) {
@@ -56,7 +77,7 @@ function useAmplifyWalletAuth(awsconfig) {
         }
 
         auth.signIn(pubKey)
-            .then(cognitoUser => answerAuthChallenge(cognitoUser))
+            .then(cognitoUser => answerAuthChallenge({ cognitoUser, signer }))
             .catch(err => {
                 if (err.code !== "UserNotFoundException") {
                     console.log("🛑 Error when trying to sign in:", err)
@@ -69,7 +90,7 @@ function useAmplifyWalletAuth(awsconfig) {
                         // User does exist, now
                         // Try to sign in, again
                         auth.signIn(pubKey)
-                            .then(cognitoUser => answerAuthChallenge(cognitoUser))
+                            .then(cognitoUser => answerAuthChallenge({ cognitoUser, signer }))
                             .catch(err => console.log("🛑 Error when trying to sign in:", err));
                     })
                     .catch(err => console.log("🛑 Error when trying to anwer auth challenge:", err));

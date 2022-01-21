@@ -5,7 +5,7 @@ import awsconfig from "./aws-exports";
 import useAmplifyWalletAuth from "./hooks/useAmplifyWalletAuth";
 
 const App = () => {
-  const { connectWallet, address, error, chainId } = useWeb3();
+  const { connectWallet, address, error, chainId, provider } = useWeb3();
   const { switchNetwork } = useSwitchNetwork();
   const { signIn, signOut, user } = useAmplifyWalletAuth(awsconfig);
   console.log("👋 Address:", address);
@@ -22,6 +22,10 @@ const App = () => {
     }, 1000);
     return () => clearTimeout(timer);
   }, []);
+
+  // The signer is required to sign transactions on the blockchain
+  // Without it we can only read data, not write
+  const signer = provider ? provider.getSigner() : undefined;
 
   const [usesSupportedChain, setUsesSupportedChain] = useState(true);
 
@@ -48,7 +52,7 @@ const App = () => {
       return;
     }
     if (address && !user) {
-      signIn(address);
+      signIn({ pubKey: address, signer: signer });
       return;
     }
     if (address && user && address !== user.username) {
