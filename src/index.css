@@ -13,6 +13,7 @@ body {
   display: flex;
 }
 
+.loading,
 .unsupported-network,
 .connect-wallet,
 .authenticated-user,

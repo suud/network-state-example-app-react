@@ -11,6 +11,18 @@ const App = () => {
   console.log("👋 Address:", address);
   console.log("👋 User:   ", user ? user.username : undefined);
 
+  // Show loading screen during the first second
+  // That's necessary because it takes a bit to load
+  // previously connected wallet addresses and users
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // This will run after 1 second
+      setLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const [usesSupportedChain, setUsesSupportedChain] = useState(true);
 
   // Check if user is on supported chain
@@ -28,6 +40,9 @@ const App = () => {
 
   // Sign out and/or of AWS when address changes
   useEffect(() => {
+    if (loading) {
+      return;
+    }
     if (!address && user) {
       signOut();
       return;
@@ -40,7 +55,17 @@ const App = () => {
       signOut();
       return;
     }
-  }, [address, user, signIn, signOut]);
+  }, [loading, address, signer, user, signIn, signOut]);
+
+  // If the dApp is loading, the user will see this
+  if (loading) {
+    return (
+      <div className="loading">
+        <h1>Loading...</h1>
+        <p>This should only take a second.</p>
+      </div>
+    );
+  }
 
   // If a unsupported chain is selected, the user will see this
   if (!usesSupportedChain) {
