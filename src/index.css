@@ -14,10 +14,10 @@ body {
 }
 
 .loading,
+.sign-in,
 .unsupported-network,
 .connect-wallet,
-.authenticated-user,
-.not-a-citizen {
+.authenticated-user {
   flex-direction: column;
   width: 960px;
   max-width: calc(100% - 1rem);

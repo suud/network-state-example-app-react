@@ -34,7 +34,6 @@ function useAmplifyWalletAuth(awsconfig) {
     }
 
     const answerAuthChallenge = ({ cognitoUser, signer }) => {
-        console.log(cognitoUser);
         if (!cognitoUser) {
             console.log("🤔 No cognitoUser given...");
             return;
@@ -50,7 +49,6 @@ function useAmplifyWalletAuth(awsconfig) {
 
         signer.signMessage(cognitoUser.challengeParam.loginCode)
             .then(answer => {
-                console.log(answer);
                 auth.sendCustomChallengeAnswer(cognitoUser, answer)
                     .then(authenticatedUser => {
                         setUser(authenticatedUser)

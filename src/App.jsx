@@ -12,7 +12,7 @@ const App = () => {
   console.log("👋 User:   ", user ? user.username : undefined);
 
   // Show loading screen during the first second
-  // That's necessary because it takes a bit to load
+  // That's necessary because it takes some time to load
   // previously connected wallet addresses and users
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -42,7 +42,7 @@ const App = () => {
     setUsesSupportedChain(true);
   }, [chainId, error]);
 
-  // Sign out and/or of AWS when address changes
+  // Sign out of AWS when address changes
   useEffect(() => {
     if (loading) {
       return;
@@ -51,15 +51,11 @@ const App = () => {
       signOut();
       return;
     }
-    if (address && !user) {
-      signIn({ pubKey: address, signer: signer });
-      return;
-    }
     if (address && user && address !== user.username) {
       signOut();
       return;
     }
-  }, [loading, address, signer, user, signIn, signOut]);
+  }, [loading, address, user, signOut]);
 
   // If the dApp is loading, the user will see this
   if (loading) {
@@ -108,8 +104,12 @@ const App = () => {
 
   // Users with connected wallet but no auth session see this
   return (
-    <div className="not-a-citizen">
-      <h1>You are not a Bike Land Citizen</h1>
+    <div className="sign-in">
+      <h1>Sign In</h1>
+      <p>You'll be asked to sign a message to verify it's you!</p>
+      <button onClick={() => signIn({ pubKey: address, signer: signer })} className="btn-hero">
+        Authenticate
+      </button>
     </div>
   );
 };
