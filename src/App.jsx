@@ -7,7 +7,7 @@ import useAmplifyWalletAuth from "./hooks/useAmplifyWalletAuth";
 const App = () => {
   const { connectWallet, address, error, chainId, provider } = useWeb3();
   const { switchNetwork } = useSwitchNetwork();
-  const [user, signIn, signOut, signingIn] = useAmplifyWalletAuth(awsconfig);
+  const [user, signIn, signOut, signingIn, authError] = useAmplifyWalletAuth(awsconfig);
   console.log("👋 Address:", address);
   console.log("👋 User:   ", user ? user.username : undefined);
 
@@ -58,7 +58,10 @@ const App = () => {
       signOut();
       return;
     }
-  }, [loading, signingIn, address, user, signOut]);
+    if (address && !user && !authError) {
+      signIn({ pubKey: address, signer: signer })
+    }
+  }, [loading, signingIn, address, user, authError, signIn, signOut, signer]);
 
   // If the dApp is loading, the user will see this
   if (loading) {
