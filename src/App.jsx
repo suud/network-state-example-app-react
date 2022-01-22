@@ -7,7 +7,7 @@ import useAmplifyWalletAuth from "./hooks/useAmplifyWalletAuth";
 const App = () => {
   const { connectWallet, address, error, chainId, provider } = useWeb3();
   const { switchNetwork } = useSwitchNetwork();
-  const { signIn, signOut, user } = useAmplifyWalletAuth(awsconfig);
+  const [user, signIn, signOut, signingIn] = useAmplifyWalletAuth(awsconfig);
   console.log("👋 Address:", address);
   console.log("👋 User:   ", user ? user.username : undefined);
 
@@ -47,6 +47,9 @@ const App = () => {
     if (loading) {
       return;
     }
+    if (signingIn) {
+      return;
+    }
     if (!address && user) {
       signOut();
       return;
@@ -55,7 +58,7 @@ const App = () => {
       signOut();
       return;
     }
-  }, [loading, address, user, signOut]);
+  }, [loading, signingIn, address, user, signOut]);
 
   // If the dApp is loading, the user will see this
   if (loading) {
@@ -92,6 +95,17 @@ const App = () => {
     );
   }
 
+
+  // When authenticating with amplify, the user will see this
+  if (signingIn) {
+    return (
+      <div className="signing-in">
+        <h1>Log In</h1>
+        <p>You'll be asked to sign a message to verify it's you!</p>
+      </div>
+    );
+  }
+
   // Authenticated users will see this
   if (user) {
     return (
@@ -104,11 +118,15 @@ const App = () => {
 
   // Users with connected wallet but no auth session see this
   return (
-    <div className="sign-in">
-      <h1>Sign In</h1>
-      <p>You'll be asked to sign a message to verify it's you!</p>
+    <div className="not-a-citizen">
+      <h1>Not Authorized</h1>
+      <p>
+        We were not able to verify that you're a Bike Land Citizen.
+        <br />
+        Make sure you have the wallet with your Bike Land Citizenship NFT connected and try again.
+      </p>
       <button onClick={() => signIn({ pubKey: address, signer: signer })} className="btn-hero">
-        Authenticate
+        Try again
       </button>
     </div>
   );

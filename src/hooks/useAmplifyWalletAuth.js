@@ -3,6 +3,8 @@ import Amplify, { Auth } from "aws-amplify";
 
 function useAmplifyWalletAuth(awsconfig) {
     const [user, setUser] = useState(undefined);
+    const [error, setError] = useState(undefined);
+    const [signingIn, setSigningIn] = useState(false);
 
     // Configure AWS Amplify authentication resource
     const auth = useMemo(() => {
@@ -36,14 +38,17 @@ function useAmplifyWalletAuth(awsconfig) {
     const answerAuthChallenge = ({ cognitoUser, signer }) => {
         if (!cognitoUser) {
             console.log("🤔 No cognitoUser given...");
+            setSigningIn(false);
             return;
         }
         if (!cognitoUser.challengeParam || !cognitoUser.challengeParam.loginCode) {
             console.log("🤔 No loginCode given...");
+            setSigningIn(false);
             return;
         }
         if (user) {
             console.log("🤔 User already authenticated...");
+            setSigningIn(false);
             return;
         }
 
@@ -53,14 +58,27 @@ function useAmplifyWalletAuth(awsconfig) {
                     .then(authenticatedUser => {
                         setUser(authenticatedUser)
                         console.log("✅ Successfully answered auth challenge!")
+                        setSigningIn(false);
                     })
-                    .catch(err => console.log("🛑 Error when trying to anwer auth challenge:", err));
+                    .catch(err => {
+                        console.log("🛑 Error when trying to anwer auth challenge:", err);
+                        setError(err);
+                        setSigningIn(false);
+                    });
             })
-            .catch(err => console.log("🛑 Error when trying to sign challenge code:", err));
+            .catch(err => {
+                console.log("🛑 Error when trying to sign challenge code:", err);
+                setError(err);
+                setSigningIn(false);
+            });
     }
 
     // Sign in
     const signIn = ({ pubKey, signer }) => {
+        if (signingIn) {
+            console.log("🤔 Already signing in...");
+            return;
+        }
         if (!pubKey) {
             console.log("🤔 No pubKey given...");
             return;
@@ -74,11 +92,16 @@ function useAmplifyWalletAuth(awsconfig) {
             return;
         }
 
+        setSigningIn(true);
+        setError(undefined);
         auth.signIn(pubKey)
             .then(cognitoUser => answerAuthChallenge({ cognitoUser, signer }))
             .catch(err => {
                 if (err.code !== "UserNotFoundException") {
                     console.log("🛑 Error when trying to sign in:", err)
+                    setError(err);
+                    setSigningIn(false);
+                    return;
                 }
 
                 // User does not exist, sign up
@@ -89,9 +112,17 @@ function useAmplifyWalletAuth(awsconfig) {
                         // Try to sign in, again
                         auth.signIn(pubKey)
                             .then(cognitoUser => answerAuthChallenge({ cognitoUser, signer }))
-                            .catch(err => console.log("🛑 Error when trying to sign in:", err));
+                            .catch(err => {
+                                console.log("🛑 Error when trying to sign in:", err);
+                                setError(err);
+                                setSigningIn(false);
+                            });
                     })
-                    .catch(err => console.log("🛑 Error when trying to anwer auth challenge:", err));
+                    .catch(err => {
+                        console.log("🛑 Error when trying to anwer auth challenge:", err);
+                        setError(err);
+                        setSigningIn(false);
+                    });
             });
     }
 
@@ -103,7 +134,7 @@ function useAmplifyWalletAuth(awsconfig) {
             .catch(err => console.log("🛑 Error when trying to sign out:", err));
     };
 
-    return { signIn, signOut, user };
+    return [user, signIn, signOut, signingIn, error];
 }
 
 export default useAmplifyWalletAuth;
