@@ -3,13 +3,36 @@ import { useWeb3, useSwitchNetwork } from "@3rdweb/hooks";
 import config from "./config";
 import awsconfig from "./aws-exports";
 import useAmplifyWalletAuth from "./hooks/useAmplifyWalletAuth";
+import { API } from 'aws-amplify';
+
+const getJoke = (token) => {
+  const apiName = awsconfig.API.endpoints[0].name;
+  const path = "";
+  const data = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    }
+  }
+  return API.get(apiName, path, data);
+};
 
 const App = () => {
   const { connectWallet, address, error, chainId, provider } = useWeb3();
   const { switchNetwork } = useSwitchNetwork();
   const [user, token, signIn, signOut, signingIn, authError] = useAmplifyWalletAuth(awsconfig);
+  const [joke, setJoke] = useState("You're in! Enjoy our exclusive jokes.<br />Only for citizens.")
   console.log("👋 Address:", address);
   console.log("👋 User:   ", user ? user.username : undefined);
+
+  // Get a joke from the protected api
+  const fetchJoke = (token) => {
+    getJoke(token)
+      .then(newJoke => setJoke(newJoke))
+      .catch(err => {
+        setJoke("Error getting Joke... Isn't that funny?");
+        console.log("🛑 Error when trying to get joke:", err);
+      });
+  };
 
   // Show loading screen during the first second
   // That's necessary because it takes some time to load
@@ -98,8 +121,7 @@ const App = () => {
     );
   }
 
-
-  // When authenticating with amplify, the user will see this
+  // While authenticating with amplify, the user will see this
   if (signingIn) {
     return (
       <div className="signing-in">
@@ -114,7 +136,10 @@ const App = () => {
     return (
       <div className="authenticated-user">
         <h1>Bike Land</h1>
-        <p>You're in!</p>
+        <p dangerouslySetInnerHTML={{ __html: joke }} />
+        <button onClick={() => fetchJoke(token)} className="btn-hero">
+          Get Joke
+        </button>
       </div>
     );
   }

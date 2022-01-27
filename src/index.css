@@ -71,4 +71,11 @@ h2 {
 
 p {
   font-size: 1.4rem;
+  margin-top: 0rem;
+  margin-bottom: 5rem;
+}
+@media screen and (max-width: 768px) {
+  p {
+    margin-bottom: 3rem;
+  }
 }

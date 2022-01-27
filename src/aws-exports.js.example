@@ -3,6 +3,14 @@ const awsconfig = {
         region: "us-east-1",
         userPoolId: "us-east-1_A1A1A1A1A",
         userPoolWebClientId: "a1a1a1a1a1a1a1a1a1a1a1a1a1",
+    },
+    API: {
+        endpoints: [
+            {
+                name: "RestApiName",
+                endpoint: "https://1234567890-abcdefgh.amazonaws.com"
+            }
+        ]
     }
 };
 
