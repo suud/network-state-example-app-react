@@ -3,6 +3,7 @@ import Amplify, { Auth } from "aws-amplify";
 
 function useAmplifyWalletAuth(awsconfig) {
     const [user, setUser] = useState(undefined);
+    const [token, setToken] = useState(undefined);
     const [error, setError] = useState(undefined);
     const [signingIn, setSigningIn] = useState(false);
 
@@ -17,11 +18,21 @@ function useAmplifyWalletAuth(awsconfig) {
         auth.currentAuthenticatedUser()
             .then(currentUser => {
                 setUser(currentUser);
-                console.log("✅ User is authenticated!")
+                console.log("✅ User is authenticated!");
             })
             .catch(err => {
                 setUser(undefined);
                 console.log("🛑 Error when trying to get current authenticated user:", err);
+            });
+        auth.currentSession()
+            .then(currentSession => {
+                const token = currentSession.getIdToken().getJwtToken();
+                setToken(token);
+                console.log("✅ Successfully received auth token!");
+            })
+            .catch(err => {
+                setToken(undefined);
+                console.log("🛑 Error when trying to get current session:", err);
             });
     }, [auth]);
 
@@ -56,8 +67,20 @@ function useAmplifyWalletAuth(awsconfig) {
             .then(answer => {
                 auth.sendCustomChallengeAnswer(cognitoUser, answer)
                     .then(authenticatedUser => {
-                        setUser(authenticatedUser)
-                        console.log("✅ Successfully answered auth challenge!")
+                        // set user and auth token
+                        setUser(authenticatedUser);
+                        auth.currentSession()
+                            .then(currentSession => {
+                                const token = currentSession.getIdToken().getJwtToken();
+                                setToken(token);
+                                console.log("✅ Successfully received auth token!");
+                            })
+                            .catch(err => {
+                                setToken(undefined);
+                                console.log("🛑 Error when trying to get current session:", err);
+                            });
+
+                        console.log("✅ Successfully answered auth challenge!");
                         setSigningIn(false);
                     })
                     .catch(err => {
@@ -98,7 +121,7 @@ function useAmplifyWalletAuth(awsconfig) {
             .then(cognitoUser => answerAuthChallenge({ cognitoUser, signer }))
             .catch(err => {
                 if (err.code !== "UserNotFoundException") {
-                    console.log("🛑 Error when trying to sign in:", err)
+                    console.log("🛑 Error when trying to sign in:", err);
                     setError(err);
                     setSigningIn(false);
                     return;
@@ -107,7 +130,7 @@ function useAmplifyWalletAuth(awsconfig) {
                 // User does not exist, sign up
                 signUp(pubKey)
                     .then(() => {
-                        console.log("✅ Successfully signed up!")
+                        console.log("✅ Successfully signed up!");
                         // User does exist, now
                         // Try to sign in, again
                         auth.signIn(pubKey)
@@ -129,12 +152,13 @@ function useAmplifyWalletAuth(awsconfig) {
     // Sign out
     const signOut = () => {
         setUser(undefined);
+        setToken(undefined);
         auth.signOut()
             .then(() => console.log("✅ Successfully signed out!"))
             .catch(err => console.log("🛑 Error when trying to sign out:", err));
     };
 
-    return [user, signIn, signOut, signingIn, error];
+    return [user, token, signIn, signOut, signingIn, error];
 }
 
 export default useAmplifyWalletAuth;

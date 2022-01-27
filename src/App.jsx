@@ -7,7 +7,7 @@ import useAmplifyWalletAuth from "./hooks/useAmplifyWalletAuth";
 const App = () => {
   const { connectWallet, address, error, chainId, provider } = useWeb3();
   const { switchNetwork } = useSwitchNetwork();
-  const [user, signIn, signOut, signingIn, authError] = useAmplifyWalletAuth(awsconfig);
+  const [user, token, signIn, signOut, signingIn, authError] = useAmplifyWalletAuth(awsconfig);
   console.log("👋 Address:", address);
   console.log("👋 User:   ", user ? user.username : undefined);
 
