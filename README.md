@@ -1,6 +1,10 @@
 # network-state-example-app-react
 Example app which authenticates and interacts with an API that is only accessible with a wallet holding a certain token.
 
+![Auth Flow](img/auth-flow.png)
+
+This repository contains the *User Wallet* and *React App* of the sequence diagram. Have a look at [suud/network-state-backend-aws](https://github.com/suud/network-state-backend-aws) for an implementation of the other parts.
+
 ## Prerequisites
 - AWS Cognito
 - AWS API Gateway
