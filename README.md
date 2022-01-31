@@ -5,6 +5,8 @@ Example app which authenticates and interacts with an API that is only accessibl
 
 This repository contains the *User Wallet* and *React App* of the sequence diagram. Have a look at [suud/network-state-backend-aws](https://github.com/suud/network-state-backend-aws) for an implementation of the other parts.
 
+Learn more about the motivation behind this repository by reading [this article](https://blog.suud.org/aws-cognito-nft-auth).
+
 ## Prerequisites
 - AWS Cognito
 - AWS API Gateway
